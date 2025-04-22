@@ -1,0 +1,16 @@
+# Sensitive files
+config/db.php
+.env
+
+# System junk
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Uploads
+/uploads/
+
+# IDE settings
+.vscode/
+.idea/
