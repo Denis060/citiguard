@@ -1,14 +1,12 @@
 <?php
 session_start();
 
-// 🔐 Only logged-in users with admin/super role can access
 if (!isset($_SESSION['admin_logged_in']) || !in_array($_SESSION['admin_role'], ['admin', 'super'])) {
     header("Location: login.php");
     exit();
 }
 
 require_once '../config/db.php';
-require_once '../model/ReportModel.php';
 
 // Validate ID
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
@@ -20,7 +18,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $report_id = intval($_GET['id']);
 
-// ✅ Fetch report using JOIN to get region, district, chiefdom names
+// Fetch report
 $sql = "
 SELECT 
     r.*, 
@@ -54,60 +52,56 @@ include 'includes/admin_header.php';
   <?php include 'includes/sidebar.php'; ?>
 
   <main class="dashboard">
-    <h2>Report Details – <?= htmlspecialchars($report['tracking_id']) ?></h2>
+    <h2 class="mb-4">Report Details – <?= htmlspecialchars($report['tracking_id']) ?></h2>
 
-    <div class="report-details card">
+    <div class="card p-4 mb-4 shadow-sm">
+      <h5 class="mb-3">Report Information</h5>
       <p><strong>Type:</strong> <?= htmlspecialchars($report['type']) ?></p>
-      <p><strong>Date:</strong> <?= htmlspecialchars($report['date']) ?></p>
-      <p><strong>Location:</strong> <?= htmlspecialchars($report['location']) ?></p>
-      <p><strong>Submitted On:</strong> <?= date("F j, Y, g:i a", strtotime($report['timestamp'])) ?></p>
-
-      <!-- ✅ Display full location info -->
-      <p>
-        <strong>Region:</strong> <?= htmlspecialchars($report['region_name'] ?? '—') ?> | 
-        <strong>District:</strong> <?= htmlspecialchars($report['district_name'] ?? '—') ?> | 
-        <strong>Chiefdom:</strong> <?= htmlspecialchars($report['chiefdom_name'] ?? '—') ?>
-      </p>
-
-      <p><strong>Status:</strong>
-        <span class="status <?= strtolower($report['status']) ?>">
+      <p><strong>Status:</strong> 
+        <span class="badge <?= $report['status'] === 'Pending' ? 'bg-warning text-dark' : 'bg-success' ?>">
           <?= htmlspecialchars($report['status']) ?>
         </span>
       </p>
-      <p><strong>Description:</strong></p>
-      <div class="description-box"><?= nl2br(htmlspecialchars($report['description'])) ?></div>
+      <p><strong>Date:</strong> <?= date('d M Y, g:i a', strtotime($report['date'])) ?></p>
+      <p><strong>Region:</strong> <?= htmlspecialchars($report['region_name'] ?? '-') ?></p>
+      <p><strong>District:</strong> <?= htmlspecialchars($report['district_name'] ?? '-') ?></p>
+      <p><strong>Chiefdom:</strong> <?= htmlspecialchars($report['chiefdom_name'] ?? '-') ?></p>
+      <p><strong>Location:</strong> <?= htmlspecialchars($report['location']) ?></p>
+    </div>
 
-      <?php if (!empty($report['contact'])): ?>
-        <p><strong>Contact:</strong> <?= htmlspecialchars($report['contact']) ?></p>
+    <div class="description-box">
+      <h5>Description</h5>
+      <p><?= nl2br(htmlspecialchars($report['description'])) ?></p>
+    </div>
+
+    <!-- Evidence Display -->
+    <div class="evidence-box mt-4">
+      <h5>Evidence</h5>
+      <?php if (!empty($report['evidence_image']) && file_exists("../uploads/" . $report['evidence_image'])): ?>
+        <p><strong>Image:</strong></p>
+        <img src="../uploads/<?= $report['evidence_image'] ?>" alt="Evidence Image" class="img-fluid mb-3">
       <?php endif; ?>
 
-      <?php if (!empty($report['evidence'])): ?>
-        <div class="evidence-box">
-          <strong>Evidence:</strong><br>
-          <?php
-            $basename = basename($report['evidence']);
-            $fullPath = "../uploads/$basename";
-            $ext = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
-
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
-              echo "<img src='$fullPath' alt='evidence' style='max-width: 300px; border-radius: 6px;'>";
-            } elseif (in_array($ext, ['mp3', 'wav'])) {
-              echo "<audio controls><source src='$fullPath' type='audio/$ext'></audio>";
-            } elseif (in_array($ext, ['mp4', 'webm'])) {
-              echo "<video controls width='300'><source src='$fullPath' type='video/$ext'></video>";
-            } else {
-              echo "<a href='$fullPath' download class='btn-download'>Download Evidence</a>";
-            }
-          ?>
-        </div>
+      <?php if (!empty($report['evidence_audio']) && file_exists("../uploads/" . $report['evidence_audio'])): ?>
+        <p><strong>Audio:</strong></p>
+        <audio controls src="../uploads/<?= $report['evidence_audio'] ?>"></audio>
       <?php endif; ?>
 
-      <div class="action-buttons" style="margin-top: 25px;">
-        <a href="reports.php" class="btn-view">← Back to Reports</a>
-        <?php if ($report['status'] === 'Pending'): ?>
-          <a href="controller/mark_reviewed.php?id=<?= $report['id'] ?>" class="btn-approve">✅ Mark as Reviewed</a>
-        <?php endif; ?>
-      </div>
+      <?php if (!empty($report['evidence_video']) && file_exists("../uploads/" . $report['evidence_video'])): ?>
+        <p class="mt-3"><strong>Video:</strong></p>
+        <video controls width="100%" src="../uploads/<?= $report['evidence_video'] ?>"></video>
+      <?php endif; ?>
+    </div>
+
+    <!-- Admin Actions -->
+    <div class="mt-4 d-flex gap-3 flex-wrap">
+      <?php if ($report['status'] === 'Pending'): ?>
+        <a href="controller/mark_reviewed.php?id=<?= $report['id'] ?>" class="btn btn-success">
+          Mark as Reviewed
+        </a>
+      <?php endif; ?>
+
+      <a href="deleted_reports.php" class="btn btn-secondary">← Back to Reports</a>
     </div>
   </main>
 </div>

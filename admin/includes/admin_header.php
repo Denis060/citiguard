@@ -37,6 +37,7 @@ $adminEmail = $_SESSION['admin_email'] ?? 'Admin';
         <?php endif; ?>
 
         <li><a href="settings.php"><i class="fas fa-cog"></i> Settings</a></li>
+        <li><a href="notifications.php"><i class="fas fa-bell"></i> Notifications</a></li>
         <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
       </ul>
     </nav>

@@ -3,74 +3,58 @@ require_once '../config/db.php';
 require_once '../model/ReportModel.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $target     = $_POST['target'];
+    $type       = $_POST['type'];
     $region     = $_POST['region'];
     $district   = $_POST['district'];
     $chiefdom   = $_POST['chiefdom'];
-    $type       = $_POST['type'];
     $location   = $_POST['location'];
     $date       = $_POST['date'];
-
-    // ✅ Check for future date
-    if (strtotime($date) > time()) {
-        header("Location: ../view/report.php?error=future_date");
-        exit();
-    }
-
     $description = $_POST['description'];
-    $contact     = $_POST['contact'];
-    $timestamp   = date('Y-m-d H:i:s');
-    $status      = 'Pending';
-    $tracking_id = 'CITI-' . strtoupper(uniqid());
 
-    // ✅ Handle file upload
-    $evidence_url = '';
-    if (isset($_FILES['evidence']) && $_FILES['evidence']['error'] === UPLOAD_ERR_OK) {
-        $targetDir = '../uploads/';
-        if (!is_dir($targetDir)) mkdir($targetDir, 0755, true);
+    $tracking_id = "CITI-" . strtoupper(bin2hex(random_bytes(5)));
 
-        $fileName   = time() . '_' . basename($_FILES['evidence']['name']);
-        $targetFile = $targetDir . $fileName;
+    $image  = $_FILES['evidence_image']['name'] ?? '';
+    $audio  = $_FILES['evidence_audio']['name'] ?? '';
+    $video  = $_FILES['evidence_video']['name'] ?? '';
 
-        if (move_uploaded_file($_FILES['evidence']['tmp_name'], $targetFile)) {
-            $evidence_url = $targetFile;
-        } else {
-            // Optional: redirect with file error
-            // header("Location: ../view/report.php?error=file_upload");
-            // exit();
-            $evidence_url = '';
-        }
+    // Save uploaded files
+    $uploadDir = "../uploads/";
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir);
     }
 
-    // ✅ Insert report into the database
+    if (!empty($image)) {
+        move_uploaded_file($_FILES['evidence_image']['tmp_name'], $uploadDir . $image);
+    }
+
+    if (!empty($audio)) {
+        move_uploaded_file($_FILES['evidence_audio']['tmp_name'], $uploadDir . $audio);
+    }
+
+    if (!empty($video)) {
+        move_uploaded_file($_FILES['evidence_video']['tmp_name'], $uploadDir . $video);
+    }
+
     $stmt = $conn->prepare("
-        INSERT INTO reports (
-            tracking_id, target, region, district, chiefdom,
-            type, location, date, description, contact,
-            evidence, status, timestamp
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO reports (tracking_id, type, region, district, chiefdom, location, date, description, evidence_image, evidence_audio, evidence_video)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
+    $stmt->bind_param("sssssssssss", $tracking_id, $type, $region, $district, $chiefdom, $location, $date, $description, $image, $audio, $video);
 
-    $stmt->bind_param(
-        "ssiiissssssss",
-        $tracking_id, $target, $region, $district, $chiefdom,
-        $type, $location, $date, $description, $contact,
-        $evidence_url, $status, $timestamp
-    );
-
-    // 💾 Execute and redirect
     if ($stmt->execute()) {
+        $report_id = $conn->insert_id;
+
+        // 🔔 Create notification
+        $message = "New report submitted (Tracking ID: $tracking_id)";
+        $insert_note = $conn->prepare("INSERT INTO notifications (type, report_id, message) VALUES (?, ?, ?)");
+        $type_n = "new_report";
+        $insert_note->bind_param("sis", $type_n, $report_id, $message);
+        $insert_note->execute();
+
         header("Location: ../view/thank_you.php?id=$tracking_id");
-        exit;
+        exit();
     } else {
-        echo "❌ Error saving report: " . $stmt->error;
+        echo "Something went wrong. Please try again.";
     }
-
-    $stmt->close();
-    $conn->close();
-
-} else {
-    echo "⛔ Invalid request method.";
 }
 ?>
