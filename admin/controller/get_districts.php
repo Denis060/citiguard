@@ -17,7 +17,7 @@ if (isset($_GET['region']) && !empty($_GET['region'])) {
         $region_id = $region['id'];
 
         // 📦 Fetch districts for that region ID
-        $stmt = $conn->prepare("SELECT name FROM districts WHERE region_id = ? ORDER BY name ASC");
+        $stmt = $conn->prepare("SELECT id, name FROM districts WHERE region_id = ? ORDER BY name ASC");
         $stmt->bind_param("i", $region_id);
         $stmt->execute();
         $result = $stmt->get_result();

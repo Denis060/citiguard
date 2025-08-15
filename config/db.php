@@ -3,7 +3,7 @@
 $host = 'localhost';
 $db   = 'citiguard';
 $user = 'root';
-$pass = '';
+$pass = 'Denis55522';
 
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {

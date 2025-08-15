@@ -101,7 +101,7 @@ include 'includes/admin_header.php';
         </a>
       <?php endif; ?>
 
-      <a href="deleted_reports.php" class="btn btn-secondary">← Back to Reports</a>
+      <a href="reports.php" class="btn btn-secondary">← Back to Reports</a>
     </div>
   </main>
 </div>

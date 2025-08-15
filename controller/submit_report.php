@@ -5,11 +5,12 @@ require_once '../model/ReportModel.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $type       = $_POST['type'];
     $region     = $_POST['region'];
-    $district   = $_POST['district'];
+    $district_name   = $_POST['district'];
     $chiefdom   = $_POST['chiefdom'];
     $location   = $_POST['location'];
     $date       = $_POST['date'];
     $description = $_POST['description'];
+    $target      = $_POST['target']; // Assuming 'target' is sent from the form
 
     $tracking_id = "CITI-" . strtoupper(bin2hex(random_bytes(5)));
 
@@ -35,11 +36,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         move_uploaded_file($_FILES['evidence_video']['tmp_name'], $uploadDir . $video);
     }
 
+    // Fetch district ID
+    $stmt = $conn->prepare("SELECT id FROM districts WHERE name = ?");
+    $stmt->bind_param("s", $district_name);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $district = $result->fetch_assoc()['id'];
+
+    // Fetch chiefdom ID
+    $stmt = $conn->prepare("SELECT id FROM chiefdoms WHERE name = ?");
+    $stmt->bind_param("s", $chiefdom);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $chiefdom_id = $result->fetch_assoc()['id'];
+
     $stmt = $conn->prepare("
-        INSERT INTO reports (tracking_id, type, region, district, chiefdom, location, date, description, evidence_image, evidence_audio, evidence_video)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO reports (tracking_id, type, region, district, chiefdom, location, date, description, target, evidence_image, evidence_audio, evidence_video)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    $stmt->bind_param("sssssssssss", $tracking_id, $type, $region, $district, $chiefdom, $location, $date, $description, $image, $audio, $video);
+    $stmt->bind_param("ssssssssssss", $tracking_id, $type, $region, $district, $chiefdom_id, $location, $date, $description, $target, $image, $audio, $video);
 
     if ($stmt->execute()) {
         $report_id = $conn->insert_id;

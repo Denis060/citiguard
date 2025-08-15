@@ -371,3 +371,25 @@ body > main, body > section {
 footer {
   margin-top: auto;
 }
+
+/* Track report  */
+.input-group .form-control {
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+}
+
+.input-group .btn-primary {
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #003366;
+  border-color: #003366;
+  
+}
+
+.input-group .btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
