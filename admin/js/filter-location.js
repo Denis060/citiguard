@@ -1,39 +1,30 @@
 <script>
   // 🌍 When Region changes, fetch matching districts
   document.getElementById('region').addEventListener('change', function () {
-    const region = this.value;
+    const regionId = this.value;
 
-    fetch('controller/get_districts.php?region=' + encodeURIComponent(region))
+    fetch(`controller/get_districts.php?region_id=${regionId}`)
       .then(response => response.json())
       .then(data => {
-        const districtSelect = document.getElementById('district');
-        districtSelect.innerHTML = '<option value="">-- All Districts --</option>';
+        const districtDropdown = document.getElementById('district');
+        districtDropdown.innerHTML = '<option value="">-- All Districts --</option>';
         data.forEach(district => {
-          const option = document.createElement('option');
-          option.value = district.name;
-          option.textContent = district.name;
-          districtSelect.appendChild(option);
+          districtDropdown.innerHTML += `<option value="${district.id}">${district.name}</option>`;
         });
-
-        // Clear chiefdoms
-        document.getElementById('chiefdom').innerHTML = '<option value="">-- All Chiefdoms --</option>';
       });
   });
 
   // 🔁 When District changes, fetch matching chiefdoms
   document.getElementById('district').addEventListener('change', function () {
-    const district = this.value;
+    const districtId = this.value;
 
-    fetch('controller/get_chiefdoms.php?district=' + encodeURIComponent(district))
+    fetch(`controller/get_chiefdoms.php?district_id=${districtId}`)
       .then(response => response.json())
       .then(data => {
-        const chiefdomSelect = document.getElementById('chiefdom');
-        chiefdomSelect.innerHTML = '<option value="">-- All Chiefdoms --</option>';
+        const chiefdomDropdown = document.getElementById('chiefdom');
+        chiefdomDropdown.innerHTML = '<option value="">-- All Chiefdoms --</option>';
         data.forEach(chiefdom => {
-          const option = document.createElement('option');
-          option.value = chiefdom.name;
-          option.textContent = chiefdom.name;
-          chiefdomSelect.appendChild(option);
+          chiefdomDropdown.innerHTML += `<option value="${chiefdom.id}">${chiefdom.name}</option>`;
         });
       });
   });

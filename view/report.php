@@ -7,6 +7,11 @@ $regions = $conn->query("SELECT id, name FROM regions ORDER BY name ASC");
 ?>
 
 <section class="features">
+  <?php if (isset($_GET['error'])): ?>
+    <div class="alert alert-danger" style="margin-bottom: 1rem;">
+      <?= htmlspecialchars($_GET['error']) ?>
+    </div>
+  <?php endif; ?>
   <div class="container feature">
     <form id="reportForm" action="../controller/submit_report.php" method="POST" enctype="multipart/form-data">
 
@@ -91,8 +96,19 @@ document.getElementById('district').addEventListener('change', function () {
       </div>
 
       <div class="form-group">
-        <label for="evidence">Upload Evidence (Photo/Audio/Video):</label>
-        <input type="file" id="evidence" name="evidence" accept="image/*,video/*,audio/*">
+        <label>Upload Evidence:</label>
+        <div style="margin-bottom: 0.5rem;">
+          <label for="evidence_image">Photo:</label>
+          <input type="file" id="evidence_image" name="evidence_image" accept="image/*">
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+          <label for="evidence_audio">Audio:</label>
+          <input type="file" id="evidence_audio" name="evidence_audio" accept="audio/*">
+        </div>
+        <div>
+          <label for="evidence_video">Video:</label>
+          <input type="file" id="evidence_video" name="evidence_video" accept="video/*">
+        </div>
       </div>
 
       <div class="form-group">

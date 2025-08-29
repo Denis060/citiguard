@@ -55,11 +55,25 @@ if (!empty($to_date)) {
 }
 
 // Final SQL
-$sql = "SELECT tracking_id, type, region, district, chiefdom, location, date, status FROM reports";
+$sql = "
+    SELECT 
+        r.tracking_id, 
+        r.type, 
+        rg.name AS region_name, 
+        d.name AS district_name, 
+        c.name AS chiefdom_name, 
+        r.location, 
+        r.date, 
+        r.status 
+    FROM reports r
+    LEFT JOIN regions rg ON r.region = rg.id
+    LEFT JOIN districts d ON r.district = d.id
+    LEFT JOIN chiefdoms c ON r.chiefdom = c.id
+";
 if (!empty($conditions)) {
     $sql .= " WHERE " . implode(" AND ", $conditions);
 }
-$sql .= " ORDER BY date DESC";
+$sql .= " ORDER BY r.date DESC";
 
 // Run Query
 $stmt = $conn->prepare($sql);
@@ -69,8 +83,20 @@ if (!empty($params)) {
 $stmt->execute();
 $result = $stmt->get_result();
 
+if ($result->num_rows === 0) {
+    echo "No reports found for the selected filters.";
+    exit;
+}
+
 // Build PDF
-$html = "<h2 style='text-align: center;'>CitiGuard - Filtered Report Export</h2>";
+$html = "<style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .header { text-align: center; font-size: 1.5rem; margin-bottom: 20px; }
+    .footer { text-align: center; font-size: 0.8rem; margin-top: 20px; }
+</style>";
+$html .= "<div class='header'>CitiGuard - Filtered Report Export</div>";
 $html .= "<table border='1' width='100%' cellpadding='6' cellspacing='0'>
 <thead>
   <tr>
@@ -86,15 +112,17 @@ $html .= "<table border='1' width='100%' cellpadding='6' cellspacing='0'>
 </thead><tbody>";
 
 while ($row = $result->fetch_assoc()) {
+    $formattedDate = date('F j, Y', strtotime($row['date']));
+    $statusColor = $row['status'] === 'Pending' ? 'orange' : 'green';
     $html .= "<tr>
       <td>{$row['tracking_id']}</td>
       <td>{$row['type']}</td>
-      <td>{$row['region']}</td>
-      <td>{$row['district']}</td>
-      <td>{$row['chiefdom']}</td>
+      <td>{$row['region_name']}</td>
+      <td>{$row['district_name']}</td>
+      <td>{$row['chiefdom_name']}</td>
       <td>{$row['location']}</td>
-      <td>{$row['date']}</td>
-      <td>{$row['status']}</td>
+      <td>{$formattedDate}</td>
+      <td style='color: {$statusColor};'>{$row['status']}</td>
     </tr>";
 }
 
@@ -105,5 +133,5 @@ $dompdf = new Dompdf();
 $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'landscape');
 $dompdf->render();
-$dompdf->stream("filtered_reports.pdf", ["Attachment" => false]);
+$dompdf->stream("test.pdf", ["Attachment" => false]);
 exit;

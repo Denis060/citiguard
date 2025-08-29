@@ -1,7 +1,8 @@
 <?php include '../includes/header.php'; ?>
 
 <section class="container" style="padding: 40px 20px; max-width: 800px; margin: auto;">
-  <h2 class="mb-4">Know Your Rights</h2>
+<i class="fas fa-balance-scale fa-2x"></i>  
+<h2 class="mb-4">Know Your Rights</h2>
 
   <div class="card p-4 shadow-sm mb-4">
     <h5>Your Right to Speak Up</h5>

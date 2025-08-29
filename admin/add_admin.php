@@ -16,6 +16,7 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
+    $confirmPassword = $_POST['confirm_password'];
     $role = $_POST['role'];
 
     // Check if email already exists
@@ -26,6 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($result->num_rows > 0) {
         $error = "An admin with this email already exists.";
+    } elseif ($password !== $confirmPassword) {
+        $error = "Passwords do not match.";
     } else {
         // Hash password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -46,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <?php include 'includes/sidebar.php'; ?>
 
   <main class="dashboard">
-    <h1>Add New Admin</h1>
+    <h1 class="page-title">Add New Admin</h1>
 
     <?php if ($success): ?>
       <div class="alert success"><?= htmlspecialchars($success) ?></div>
@@ -54,20 +57,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="alert danger"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <form method="post" action="">
-      <label>Email:</label>
-      <input type="email" name="email" required>
+    <form method="post" action="" class="form-container">
+      <div class="form-group">
+        <label>Email:</label>
+        <input type="email" name="email" class="form-control" required>
+      </div>
 
-      <label>Password:</label>
-      <input type="password" name="password" required>
+      <div class="form-group">
+        <label>Password:</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
 
-      <label>Role:</label>
-      <select name="role" required>
-        <option value="admin">Admin</option>
-        <option value="moderator">Moderator</option>
-      </select>
+      <div class="form-group">
+        <label>Confirm Password:</label>
+        <input type="password" name="confirm_password" class="form-control" required>
+      </div>
 
-      <button type="submit" class="btn-primary">➕ Add Admin</button>
+      <div class="form-group">
+        <label>Role:</label>
+        <select name="role" class="form-control" required>
+          <option value="admin">Admin</option>
+          <option value="moderator">Moderator</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary">➕ Add Admin</button>
     </form>
   </main>
 </div>

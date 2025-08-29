@@ -8,27 +8,31 @@ class ReportModel {
         $params = [];
         $types = "";
 
-        if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
+        if (!empty($_GET['id'])) {
             $conditions[] = "r.id LIKE ?";
             $params[] = "%" . $_GET['id'] . "%";
             $types .= "s";
         }
-        if (!empty($_GET['type']) && preg_match('/^[\w\s-]+$/', $_GET['type'])) {
+
+        if (!empty($_GET['type'])) {
             $conditions[] = "r.type LIKE ?";
             $params[] = "%" . $_GET['type'] . "%";
             $types .= "s";
         }
-        if (!empty($_GET['location']) && preg_match('/^[\w\s,-]+$/', $_GET['location'])) {
+
+        if (!empty($_GET['location'])) {
             $conditions[] = "r.location LIKE ?";
             $params[] = "%" . $_GET['location'] . "%";
             $types .= "s";
         }
-        if (!empty($_GET['from_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['from_date'])) {
+
+        if (!empty($_GET['from_date'])) {
             $conditions[] = "r.date >= ?";
             $params[] = $_GET['from_date'];
             $types .= "s";
         }
-        if (!empty($_GET['to_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['to_date'])) {
+
+        if (!empty($_GET['to_date'])) {
             $conditions[] = "r.date <= ?";
             $params[] = $_GET['to_date'];
             $types .= "s";
@@ -84,37 +88,43 @@ class ReportModel {
         $params = [];
         $types = "";
 
-        if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
+        if (!empty($_GET['id'])) {
             $conditions[] = "r.id LIKE ?";
             $params[] = "%" . $_GET['id'] . "%";
             $types .= "s";
         }
-        if (!empty($_GET['type']) && preg_match('/^[\w\s-]+$/', $_GET['type'])) {
+
+        if (!empty($_GET['type'])) {
             $conditions[] = "r.type LIKE ?";
             $params[] = "%" . $_GET['type'] . "%";
             $types .= "s";
         }
-        if (!empty($_GET['region']) && ctype_digit($_GET['region'])) {
+
+        if (!empty($_GET['region'])) {
             $conditions[] = "r.region = ?";
             $params[] = $_GET['region'];
             $types .= "i";
         }
-        if (!empty($_GET['district']) && ctype_digit($_GET['district'])) {
+
+        if (!empty($_GET['district'])) {
             $conditions[] = "r.district = ?";
             $params[] = $_GET['district'];
             $types .= "i";
         }
-        if (!empty($_GET['chiefdom']) && ctype_digit($_GET['chiefdom'])) {
+
+        if (!empty($_GET['chiefdom'])) {
             $conditions[] = "r.chiefdom = ?";
             $params[] = $_GET['chiefdom'];
             $types .= "i";
         }
-        if (!empty($_GET['from_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['from_date'])) {
+
+        if (!empty($_GET['from_date'])) {
             $conditions[] = "r.date >= ?";
             $params[] = $_GET['from_date'];
             $types .= "s";
         }
-        if (!empty($_GET['to_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['to_date'])) {
+
+        if (!empty($_GET['to_date'])) {
             $conditions[] = "r.date <= ?";
             $params[] = $_GET['to_date'];
             $types .= "s";
