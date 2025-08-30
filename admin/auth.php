@@ -25,6 +25,8 @@ if ($result && $result->num_rows === 1) {
 
     // ✅ Verify hashed password
     if (password_verify($password, $admin['password'])) {
+        // ✅ Regenerate session ID for security
+        session_regenerate_id(true);
         // ✅ Set session variables
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_email'] = $admin['email'];

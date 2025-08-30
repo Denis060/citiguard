@@ -3,6 +3,11 @@ require_once '../config/db.php';
 require_once '../model/ReportModel.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // CSRF token check
+    session_start();
+    if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die('Invalid CSRF token. Please reload the form and try again.');
+    }
     // File size error feedback
     $file_error = '';
     // Validate and sanitize all input
@@ -30,13 +35,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate and save image
     if (!empty($image)) {
         $allowed_types = ['image/png', 'image/jpeg', 'image/jpg'];
-        $filetype = $_FILES['evidence_image']['type'];
         $filesize = $_FILES['evidence_image']['size'];
+        $tmp_name = $_FILES['evidence_image']['tmp_name'];
+        $real_mime = mime_content_type($tmp_name);
         if ($filesize >= 4*1024*1024) {
             $file_error = 'Image file is too large (max 4MB).';
-        } elseif (in_array($filetype, $allowed_types)) {
+        } elseif (in_array($real_mime, $allowed_types)) {
             $safe_name = uniqid('img_', true) . '_' . basename($image);
-            move_uploaded_file($_FILES['evidence_image']['tmp_name'], $uploadDir . $safe_name);
+            move_uploaded_file($tmp_name, $uploadDir . $safe_name);
             $image = $safe_name;
         } else {
             $image = '';
@@ -45,13 +51,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate and save audio
     if (!empty($audio)) {
         $allowed_types = ['audio/mpeg', 'audio/mp3', 'audio/wav'];
-        $filetype = $_FILES['evidence_audio']['type'];
         $filesize = $_FILES['evidence_audio']['size'];
+        $tmp_name = $_FILES['evidence_audio']['tmp_name'];
+        $real_mime = mime_content_type($tmp_name);
         if ($filesize >= 10*1024*1024) {
             $file_error = 'Audio file is too large (max 10MB).';
-        } elseif (in_array($filetype, $allowed_types)) {
+        } elseif (in_array($real_mime, $allowed_types)) {
             $safe_name = uniqid('aud_', true) . '_' . basename($audio);
-            move_uploaded_file($_FILES['evidence_audio']['tmp_name'], $uploadDir . $safe_name);
+            move_uploaded_file($tmp_name, $uploadDir . $safe_name);
             $audio = $safe_name;
         } else {
             $audio = '';
@@ -60,13 +67,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate and save video
     if (!empty($video)) {
         $allowed_types = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
-        $filetype = $_FILES['evidence_video']['type'];
         $filesize = $_FILES['evidence_video']['size'];
+        $tmp_name = $_FILES['evidence_video']['tmp_name'];
+        $real_mime = mime_content_type($tmp_name);
         if ($filesize >= 40*1024*1024) {
             $file_error = 'Video file is too large (max 40MB).';
-        } elseif (in_array($filetype, $allowed_types)) {
+        } elseif (in_array($real_mime, $allowed_types)) {
             $safe_name = uniqid('vid_', true) . '_' . basename($video);
-            move_uploaded_file($_FILES['evidence_video']['tmp_name'], $uploadDir . $safe_name);
+            move_uploaded_file($tmp_name, $uploadDir . $safe_name);
             $video = $safe_name;
         } else {
             $video = '';
